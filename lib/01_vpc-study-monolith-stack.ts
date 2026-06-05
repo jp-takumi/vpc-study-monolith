@@ -76,6 +76,9 @@ export class VpcStudyMonolithStack extends cdk.Stack {
     });
 
 
+    // const igw = new ec2.CfnInternetGateway(this, 'MyCfnInternetGateway',{
+    //   tags: [{ key: 'Name',value: 'my-igw'}]
+    // });
     // ここにVPCのできる前と後のコードを直書きしていきます！
     
     //--------------------------------- 
