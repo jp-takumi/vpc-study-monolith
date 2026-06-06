@@ -136,6 +136,7 @@ export class VpcStudyMonolithStack extends cdk.Stack {
       tags: [{ key: 'Name', value: 'my-monolith-rt'}],
     });
 
+    //igwのルートテーブルを追加
     new ec2.CfnRoute(this, 'DefaultRoute',{
       routeTableId: routeTable.ref,
       destinationCidrBlock: "0.0.0.0/0",
