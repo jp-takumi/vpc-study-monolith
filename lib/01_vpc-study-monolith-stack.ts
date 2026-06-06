@@ -53,7 +53,7 @@ export class VpcStudyMonolithStack extends cdk.Stack {
         budgetType: 'COST',   //コストベースの予算
         timeUnit: 'MONTHLY',  //月単位の計算
         budgetLimit: {
-          amount: 0.01,
+          amount: 10,
           unit: 'USD'         //上限額10$
         },
       },
@@ -75,10 +75,11 @@ export class VpcStudyMonolithStack extends cdk.Stack {
       ],
     });
 
+    //igwを定義
+    const igw = new ec2.CfnInternetGateway(this, 'MyCfnInternetGateway',{
+      tags: [{ key: 'Name',value: 'my-igw'}]
+    });
 
-    // const igw = new ec2.CfnInternetGateway(this, 'MyCfnInternetGateway',{
-    //   tags: [{ key: 'Name',value: 'my-igw'}]
-    // });
     // ここにVPCのできる前と後のコードを直書きしていきます！
     
     //--------------------------------- 
@@ -89,6 +90,12 @@ export class VpcStudyMonolithStack extends cdk.Stack {
       enableDnsSupport: true,
       enableDnsHostnames: true,
       tags: [{ key: 'Name', value: 'my-monolith-vpc'}],
+    });
+
+    //igwとvpcを紐づける
+    new ec2.CfnVPCGatewayAttachment(this, 'IgwAttachment',{
+      vpcId: vpc.ref,
+      internetGatewayId: igw.ref,
     });
 
     //--------------------------------- 
@@ -127,6 +134,12 @@ export class VpcStudyMonolithStack extends cdk.Stack {
     const routeTable = new ec2.CfnRouteTable(this, 'MyRouteTable',{
       vpcId: vpc.ref,
       tags: [{ key: 'Name', value: 'my-monolith-rt'}],
+    });
+
+    new ec2.CfnRoute(this, 'DefaultRoute',{
+      routeTableId: routeTable.ref,
+      destinationCidrBlock: "0.0.0.0/0",
+      gatewayId: igw.ref,
     });
 
     //--------------------------------- 
