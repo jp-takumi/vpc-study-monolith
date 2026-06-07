@@ -168,6 +168,7 @@ export class VpcStudyMonolithStack extends cdk.Stack {
   region ap-northeast-1 > my-test-ec2-key.pem
   chmod 400 my-test-ec2-key.pem
   */
+
     //EC2Instance
     new ec2.CfnInstance(this, 'MyEC2Instance', {
       imageId: 'ami-0599b6e53ca798bb2', // Amazon Linux 2の東京リージョンのAMI ID
@@ -176,7 +177,7 @@ export class VpcStudyMonolithStack extends cdk.Stack {
       securityGroupIds: [sgec2.ref],
       keyName: 'my-test-ec2-key', // キーペアを合わせる
       tags: [{ key: 'Name', value: 'MyWebServer'}],
-    })
+    });
 
 
     //--------------------------------- 
