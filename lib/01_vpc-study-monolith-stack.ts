@@ -152,22 +152,22 @@ export class VpcStudyMonolithStack extends cdk.Stack {
 
     //key pair
     const keyPair = new ec2.CfnKeyPair(this, 'MyKeyPair', {
-      keyName: 'my-ec2-key',
-      tags: [{ key: 'Name', value: 'my-ec2-key'}],
+      keyName: 'my-test-ec2-key',
+      tags: [{ key: 'Name', value: 'my-test-ec2-key'}],
     });
 
   /* これで作成したキーペアの秘密鍵を取得できる
   aws ssm get-parameter \
   --name /ec2/keypair/$(aws ec2 describe-key-pairs \
-  --filters Name=key-name,Values=my-ec2-key \
+  --filters Name=key-name,Values=my-test-ec2-key \
   --query "KeyPairs[0].KeyPairId" \
   --output text) \
   --with-decryption \
   --query Parameter.Value \
   --output text \
-  --region ap-northeast-1 > my-ec2-key.pem
+  --region ap-northeast-1 > my-test-ec2-key.pem
 
-  chmod 400 my-ec2-key.pem
+  chmod 400 my-test-ec2-key.pem
   */
     //EC2Instance
     new ec2.CfnInstance(this, 'MyEC2Instance', {
@@ -175,7 +175,7 @@ export class VpcStudyMonolithStack extends cdk.Stack {
       instanceType: 't3.micro',
       subnetId: publicSubnetEc2.ref,
       securityGroupIds: [sgec2.ref],
-      keyName: 'my-ec2-key', // キーペアを合わせる
+      keyName: 'my-test-ec2-key', // キーペアを合わせる
       tags: [{ key: 'Name', value: 'MyWebServer'}],
     })
 
