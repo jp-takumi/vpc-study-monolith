@@ -92,7 +92,7 @@ export class VpcStudyMonolithStack extends cdk.Stack {
       tags: [{ key: 'Name', value: 'my-monolith-vpc'}],
     });
 
-    //igwとvpcを紐づける
+    //IGWをVPCにアタッチ
     new ec2.CfnVPCGatewayAttachment(this, 'IgwAttachment',{
       vpcId: vpc.ref,
       internetGatewayId: igw.ref,
@@ -101,7 +101,7 @@ export class VpcStudyMonolithStack extends cdk.Stack {
     //--------------------------------- 
     // subnetを作る
     //---------------------------------
-    const publicSubnet = new ec2.CfnSubnet(this, 'SimpleSubnet',{
+    const publicSubnetEc2 = new ec2.CfnSubnet(this, 'SimpleSubnet',{
       vpcId: vpc.ref,
       cidrBlock: '10.0.1.0/24',
       availabilityZone: 'ap-northeast-1a',
@@ -127,6 +127,58 @@ export class VpcStudyMonolithStack extends cdk.Stack {
       tags: [{ key: 'Name', value: 'MyPrivateRdsSubnet-1c'}],
     });
 
+    //SGの作成
+    const sgec2 = new ec2.CfnSecurityGroup(this, 'MySecurityGroup',{
+      vpcId: vpc.ref,
+      groupDescription: 'for web server',
+      securityGroupIngress: [
+        //SSH
+        {
+          ipProtocol: 'tcp',
+          fromPort: 22,
+          toPort: 22,
+          cidrIp: '0.0.0.0/0',
+        },
+        //HTTP
+        {
+          ipProtocol: 'tcp',
+          fromPort: 80,
+          toPort: 80,
+          cidrIp: '0.0.0.0/0',
+        },
+      ],
+      tags: [{ key: 'Name', value: 'my-web-sg'}],
+    })
+
+    //key pair
+    const keyPair = new ec2.CfnKeyPair(this, 'MyKeyPair', {
+      keyName: 'my-ec2-key',
+      tags: [{ key: 'Name', value: 'my-ec2-key'}],
+    });
+
+  /* これで作成したキーペアの秘密鍵を取得できる
+  aws ssm get-parameter \
+  --name /ec2/keypair/$(aws ec2 describe-key-pairs \
+  --filters Name=key-name,Values=my-ec2-key \
+  --query "KeyPairs[0].KeyPairId" \
+  --output text) \
+  --with-decryption \
+  --query Parameter.Value \
+  --output text \
+  --region ap-northeast-1 > my-ec2-key.pem
+
+  chmod 400 my-ec2-key.pem
+  */
+    //EC2Instance
+    new ec2.CfnInstance(this, 'MyEC2Instance', {
+      imageId: 'ami-0599b6e53ca798bb2', // Amazon Linux 2の東京リージョンのAMI ID
+      instanceType: 't3.micro',
+      subnetId: publicSubnetEc2.ref,
+      securityGroupIds: [sgec2.ref],
+      keyName: 'my-ec2-key', // キーペアを合わせる
+      tags: [{ key: 'Name', value: 'MyWebServer'}],
+    })
+
 
     //--------------------------------- 
     // routetableを作成
@@ -147,7 +199,7 @@ export class VpcStudyMonolithStack extends cdk.Stack {
     // subnetとroutetableを紐づけ
     //---------------------------------
     new ec2.CfnSubnetRouteTableAssociation(this, "MySubnetAssociation",{
-      subnetId: publicSubnet.ref,
+      subnetId: publicSubnetEc2.ref,
       routeTableId: routeTable.ref,
     });
   }
