@@ -158,15 +158,14 @@ export class VpcStudyMonolithStack extends cdk.Stack {
 
   /* これで作成したキーペアの秘密鍵を取得できる
   aws ssm get-parameter \
-  --name /ec2/keypair/$(aws ec2 describe-key-pairs \
-  --filters Name=key-name,Values=my-test-ec2-key \
-  --query "KeyPairs[0].KeyPairId" \
-  --output text) \
-  --with-decryption \
-  --query Parameter.Value \
-  --output text \
-  --region ap-northeast-1 > my-test-ec2-key.pem
-
+  name /ec2/keypair/$(aws ec2 describe-key-pairs \
+  filters Name=key-name,Values=my-test-ec2-key \
+  query "KeyPairs[0].KeyPairId" \
+  output text) \
+  with-decryption \
+  query Parameter.Value \
+  output text \
+  region ap-northeast-1 > my-test-ec2-key.pem
   chmod 400 my-test-ec2-key.pem
   */
     //EC2Instance
